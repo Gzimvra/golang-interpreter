@@ -76,14 +76,14 @@ func (l *Lox) run(source string) {
 
 // reportError reports an error on a specific line with a message.
 // It delegates to the report helper method.
-func (l *Lox) reportError(line int, message string) {
-	l.report(line, "", message)
+func (l *Lox) reportError(line int, err error) {
+	l.report(line, "", err)
 }
 
 // report formats and prints an error message including the line number
 // and error location, and sets the hadError flag to true.
-func (l *Lox) report(line int, where, message string) {
-	fmt.Fprintf(os.Stderr, "[line %d] Error%s: %s\n", line, where, message)
+func (l *Lox) report(line int, where string, err error) {
+	fmt.Fprintf(os.Stderr, "[line %d] Error%s: %s\n", line, where, err)
 	l.hadError = true
 }
 

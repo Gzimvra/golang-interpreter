@@ -135,7 +135,7 @@ func (s *Scanner) scanToken() {
 		} else if s.isAlpha(c) {
 			s.identifier()
 		} else {
-			s.lox.reportError(s.line, "Unexpected character.")
+			s.lox.reportError(s.line, ErrUnexpectedCharacter)
 		}
 	}
 }
@@ -179,7 +179,7 @@ func (s *Scanner) number() {
 	text := string(s.source[s.start:s.current])
 	value, err := strconv.ParseFloat(text, 64)
 	if err != nil {
-		s.lox.reportError(s.line, "Invalid number format.")
+		s.lox.reportError(s.line, ErrInvalidNumberLiteral)
 		return
 	}
 	s.addTokenWithLiteral(NUMBER, value)
@@ -199,7 +199,7 @@ func (s *Scanner) string() {
 
 	// If we reached the end without finding a closing quote, report error
 	if s.isAtEnd() {
-		s.lox.reportError(s.line, "Unterminated string.")
+		s.lox.reportError(s.line, ErrUnterminatedString)
 		return
 	}
 
