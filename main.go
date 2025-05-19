@@ -39,36 +39,34 @@ func (l *Lox) runFile(path string) error {
 	}
 
 	l.run(string(bytes))
-
 	if l.hadError {
 		os.Exit(65)
 	}
 
 	return nil
 }
+
 // runPrompt starts an interactive prompt (REPL) that reads user input line-by-line,
 // executes the input, and resets the error flag after each line.
 func (l *Lox) runPrompt() {
-	reader := bufio.NewReader(os.Stdin)
+	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
 		fmt.Print("> ")
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			break // EOF or error exits loop
+		if !scanner.Scan() {
+			break // EOF or error
 		}
-
-		// Trim newline and any surrounding whitespace
-		line = strings.TrimSpace(line)
+		line := strings.TrimSpace(scanner.Text()) // still useful for blank line handling
 
 		l.run(line)
 		l.hadError = false
 	}
 }
+
 // run takes source code as input, scans it into tokens,
 // and currently prints the tokens to standard output.
 func (l *Lox) run(source string) {
-	scanner := NewScanner(source)
+	scanner := NewScanner(source, l)
 	tokens := scanner.ScanTokens()
 
 	for _, token := range tokens {
@@ -88,3 +86,4 @@ func (l *Lox) report(line int, where, message string) {
 	fmt.Fprintf(os.Stderr, "[line %d] Error%s: %s\n", line, where, message)
 	l.hadError = true
 }
+
