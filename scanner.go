@@ -115,12 +115,15 @@ func (s *Scanner) scanToken() {
 		}
 	case '/':
 		if s.match('/') {
-			// A comment goes until the end of the line.
+            // Single-line comment
 			for s.peek() != '\n' && !s.isAtEnd() {
 				s.advance()
 			}
 			// Don't add a token for the comment, just skip it
-		} else {
+		} else if s.match('*') {
+            // C-style block comment (/*...*/)
+            s.blockComment()
+        } else {
 			s.addToken(SLASH)
 		}
 	case ' ', '\r', '\t':
@@ -298,3 +301,24 @@ func (s *Scanner) addTokenWithLiteral(tokenType TokenType, literal any) {
 	}
 	s.tokens = append(s.tokens, token)
 }
+
+// blockComment consumes characters until it finds the closing '*/' or EOF.
+// It properly updates line numbers and reports an error for unterminated comments.
+func (s *Scanner) blockComment() {
+	for !s.isAtEnd() {
+		if s.peek() == '*' && s.peekNext() == '/' {
+			// End of block comment
+			s.advance() // consume '*'
+			s.advance() // consume '/'
+			return
+		}
+		if s.peek() == '\n' {
+			s.line++
+		}
+		s.advance()
+	}
+
+	// If we reach here, the comment wasn't closed
+	s.lox.reportError(s.line, ErrUnterminatedBlockComment)
+}
+
